@@ -15,7 +15,8 @@ PAL = {
     "blue": "#1e9bf0", "navy": "#2541b2", "white": "#ffffff", "black": "#26222b", "char": "#2b2526",
     "metal": "#8d99ae", "metalDark": "#56607a", "orange": "#ff8a1f", "green": "#17a35c", "gsp": "#22b455",
     "skin": "#f2b48a", "skinDark": "#d9956b", "hairBrown": "#a9773f", "hairDark": "#6b4423", "hairBlond": "#f4d35e",
-    "fur": "#fbf8f0", "furShade": "#ddd6c8", "croc": "#7bd21c", "crocDark": "#4f9a12", "glass": "#5c7c9c",
+    "fur": "#ffffff", "furShade": "#d9d2c4", "furWarm": "#f4ecdc", "furDeep": "#b9b1a2",
+    "crocLeather": "#2a3325", "crocScale": "#4b5d3c", "crocShine": "#6f8657", "crocSole": "#14170f", "croc": "#7bd21c", "crocDark": "#4f9a12", "glass": "#5c7c9c",
     "hoodie": "#2c2833", "jogger": "#3a3542", "jeans": "#2f6fd6", "spider": "#e0202e", "caramel": "#d98a3a",
     "dogBlack": "#2a2428", "tongue": "#ff6f91", "cyan": "#35e0ff", "window": "#2a5fb0", "roof": "#ff5a3c",
     "wall": "#fff1c4", "tyre": "#26222b", "carBody": "#ff8a1f", "sand": "#ffdf8e",
@@ -120,6 +121,26 @@ class Model:
             x = center[0] + math.cos(a) * ring_r
             z = center[1] + math.sin(a) * ring_r
             self.cone(size * k, length * k, 4, (x, y, z), color, rot=(math.sin(a) * tilt, 0, -math.cos(a) * tilt))
+
+    def strands(self, count, r_top, r_bot, y_top, length, width, colors, center=(0, 0), phase=0.0, thick=0.03, vary=0.3, yvar=0.0):
+        base_y = y_top
+        for i in range(count):
+            y_top = base_y + (self.rng.random() - 0.5) * 2 * yvar
+            a = i / count * math.tau + phase + (self.rng.random() - 0.5) * 0.3
+            ln = length * (1 + (self.rng.random() - 0.5) * vary)
+            w = width * (1 + (self.rng.random() - 0.5) * vary)
+            nx, nz = math.cos(a), math.sin(a)
+            tx, tz = -nz, nx
+            sway = (self.rng.random() - 0.5) * 0.06
+            cx, cz = center
+            top = lambda st, sn: (cx + nx * (r_top + sn * thick) + tx * st * w / 2, y_top, cz + nz * (r_top + sn * thick) + tz * st * w / 2)
+            mid_y = y_top - ln * 0.55
+            r_mid = r_top + (r_bot - r_top) * 0.55 + thick * 0.6
+            mid = lambda st: (cx + nx * r_mid + tx * (st * w * 0.42 + sway), mid_y, cz + nz * r_mid + tz * (st * w * 0.42 + sway))
+            tip = (cx + nx * r_bot + tx * sway * 2, y_top - ln, cz + nz * r_bot + tz * sway * 2)
+            v = [top(1, 1), top(-1, 1), top(-1, -1), top(1, -1), mid(1), mid(-1), tip]
+            f = [(0, 1, 5, 4), (4, 5, 6), (3, 0, 4), (1, 2, 5), (2, 3, 4, 5), (0, 3, 2, 1)]
+            self.add(v, f, colors[self.rng.randrange(len(colors))])
 
     def build(self, collection=None):
         mesh = bpy.data.meshes.new(self.name)

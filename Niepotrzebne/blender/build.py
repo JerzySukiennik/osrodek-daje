@@ -108,7 +108,7 @@ def sheet(names, path, spacing, per_row, cam_dir, fov_deg, size):
     width = per_row * spacing[0]
     depth = rows * spacing[1]
     dist = max(width / (2 * math.tan(cam_data.angle / 2)), depth * 1.2) * 1.12
-    aim_camera(cam, (0, 0, 0.6), cam_dir, dist)
+    aim_camera(cam, (0, 0, 0.95 if names[0] in ("ks", "jurek") else 0.6), cam_dir, dist * (1.9 if len(names) == 1 else 1))
     scene.render.filepath = path
     bpy.ops.render.render(write_still=True)
     print("RENDERED", path)
@@ -120,7 +120,8 @@ MEDIUM = ["bench", "deckchair", "barrel", "grill", "bush", "parasol", "fence", "
 LARGE = ["sign", "pine", "rocket", "car", "cabin"]
 
 sheet(CHARS, os.path.join(RENDER_DIR, "characters-front.png"), (1.1, 1.5), 4, (0.0, -1.0, 0.28), 24, (1600, 1000))
-sheet(CHARS, os.path.join(RENDER_DIR, "characters-side.png"), (1.1, 1.5), 4, (0.75, -0.7, 0.4), 24, (1600, 1000))
+sheet(CHARS, os.path.join(RENDER_DIR, "characters-side.png"), (1.3, 1.5), 4, (0.75, -0.7, 0.4), 30, (1600, 1000))
+sheet(["ks"], os.path.join(RENDER_DIR, "ks-closeup.png"), (1.2, 1.2), 1, (0.35, -1.0, 0.25), 30, (1000, 1400))
 sheet(CHARS, os.path.join(RENDER_DIR, "characters-back.png"), (1.1, 1.5), 4, (0.35, 1.0, 0.45), 24, (1600, 1000))
 sheet(SMALL, os.path.join(RENDER_DIR, "props-small.png"), (1.0, 1.1), 7, (0.0, -0.75, 0.62), 26, (1600, 900))
 sheet(MEDIUM, os.path.join(RENDER_DIR, "props-medium.png"), (3.3, 3.4), 5, (0.0, -0.75, 0.62), 26, (1600, 900))

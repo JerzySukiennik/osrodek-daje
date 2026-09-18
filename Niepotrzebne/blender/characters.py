@@ -22,25 +22,43 @@ def face(m, y, z, eye_dx=0.075, eye="black", smile=True, brow=None):
 def ks():
     m = Model("ks")
     for s in (-1, 1):
-        m.cyl(0.085, 0.1, 0.5, 8, (s * 0.12, 0.3, 0), "croc")
-        m.box(0.19, 0.11, 0.34, (s * 0.12, 0.055, 0.06), "croc", top=(0.85, 0.8))
-        m.box(0.2, 0.035, 0.36, (s * 0.12, 0.018, 0.06), "crocDark")
+        x = s * 0.12
+        m.cyl(0.082, 0.098, 0.56, 8, (x, 0.36, 0), "crocLeather")
+        m.cyl(0.105, 0.1, 0.05, 8, (x, 0.64, 0), "crocSole")
+        m.box(0.19, 0.11, 0.36, (x, 0.075, 0.07), "crocLeather", top=(0.82, 0.78))
+        m.box(0.2, 0.04, 0.38, (x, 0.02, 0.07), "crocSole")
+        m.box(0.13, 0.05, 0.1, (x, 0.025, -0.08), "crocSole")
+        for row in range(5):
+            y = 0.17 + row * 0.095
+            for col in range(3):
+                a = (col - 1) * 0.62 + (0.31 if row % 2 else 0)
+                r = 0.088 + (0.61 - y) * -0.0 + 0.004
+                rr = 0.082 + (y - 0.08) / 0.56 * 0.016
+                m.box(0.05, 0.062, 0.022, (x + math.sin(a) * rr, y, math.cos(a) * rr), "crocScale" if (row + col) % 3 else "crocShine", rot=(0, a, 0), top=(0.7, 0.6))
         for k in range(3):
-            m.box(0.06, 0.03, 0.05, (s * 0.12, 0.2 + k * 0.12, 0.1), "crocDark")
-        m.cyl(0.105, 0.105, 0.05, 8, (s * 0.12, 0.55, 0), "crocDark")
-        m.cyl(0.075, 0.08, 0.2, 6, (s * 0.12, 0.66, 0), "navy")
-    m.cyl(0.4, 0.27, 0.95, 9, (0, 1.12, 0), "fur", cap_color="furShade")
-    m.cyl(0.27, 0.2, 0.12, 9, (0, 1.62, 0), "fur")
-    m.spikes(11, 0.39, 0.66, 0.09, 0.26, "fur", tilt=2.3)
-    m.spikes(9, 0.36, 0.95, 0.08, 0.22, "furShade", tilt=2.0, phase=0.3)
-    m.spikes(9, 0.31, 1.25, 0.075, 0.2, "fur", tilt=1.9, phase=0.1)
-    m.spikes(9, 0.24, 1.66, 0.08, 0.2, "fur", tilt=1.35, phase=0.2)
-    m.box(0.05, 0.92, 0.04, (0, 1.12, 0.335), "furShade", rot=(-0.13, 0, 0))
-    m.box(0.16, 0.26, 0.05, (0, 1.5, 0.255), "white", rot=(-0.1, 0, 0))
+            for j in range(2):
+                m.box(0.055, 0.02, 0.06, (x + (j - 0.5) * 0.07, 0.128 - k * 0.004, 0.06 + k * 0.075), "crocScale" if (k + j) % 2 else "crocShine", top=(0.7, 0.7))
+        m.cyl(0.07, 0.075, 0.16, 6, (x, 0.74, 0), "navy")
+    m.cyl(0.41, 0.26, 0.98, 10, (0, 1.13, 0), "furDeep")
+    m.cyl(0.26, 0.19, 0.12, 10, (0, 1.66, 0), "furDeep")
+    cols = ["fur", "furWarm", "fur", "furShade"]
+    y = 1.6
+    k = 0
+    while y > 0.86:
+        t = (1.66 - y) / 1.0
+        r = 0.255 + t * 0.15
+        m.strands(18 + int(t * 8), r, r + 0.05 + t * 0.02, y, 0.46, 0.115, cols, phase=k * 0.41, yvar=0.05, thick=0.02, vary=0.5)
+        y -= 0.12
+        k += 1
+    m.strands(18, 0.2, 0.36, 1.69, 0.36, 0.12, cols, phase=0.2, thick=0.02, yvar=0.02, vary=0.4)
+    m.strands(14, 0.16, 0.3, 1.71, 0.24, 0.11, ["fur", "furWarm", "fur"], phase=0.55, thick=0.02, yvar=0.015, vary=0.4)
     for s in (-1, 1):
-        m.cyl(0.085, 0.11, 0.6, 7, (s * 0.37, 1.3, 0.02), "fur", rot=(0, 0, s * 0.3))
-        m.spikes(6, 0.1, 1.04, 0.06, 0.16, "furShade", center=(s * 0.46, 0.02), tilt=2.2)
-        m.ico(0.065, (s * 0.47, 0.98, 0.03), "skin")
+        ax = s * 0.37
+        m.cyl(0.08, 0.105, 0.6, 7, (ax, 1.3, 0.02), "furDeep", rot=(0, 0, s * 0.3))
+        for j in range(5):
+            yy = 1.58 - j * 0.1
+            m.strands(9, 0.095, 0.13, yy, 0.3, 0.085, cols, center=(s * (0.285 + j * 0.031), 0.02), phase=j * 0.5, yvar=0.03, thick=0.02, vary=0.5)
+        m.ico(0.065, (s * 0.47, 0.97, 0.03), "skin")
     m.cyl(0.07, 0.07, 0.1, 6, (0, 1.69, 0), "skin")
     m.ico(0.15, (0, 1.85, 0.0), "skin", scale=(0.95, 1.12, 0.95))
     m.ico(0.165, (0, 1.9, -0.03), "hairBrown", scale=(1.0, 0.95, 1.0))
@@ -66,17 +84,16 @@ def rys():
         m.box(0.135, 0.03, 0.25, (s * 0.085, 0.015, 0.04), "red")
     m.cyl(0.2, 0.23, 0.22, 9, (0, 0.72, 0), "spider")
     m.cyl(0.23, 0.18, 0.34, 9, (0, 0.98, 0), "spider")
-    m.spikes(9, 0.21, 0.66, 0.06, 0.14, "spider", tilt=2.2)
-    m.spikes(8, 0.22, 0.9, 0.055, 0.12, "coral", tilt=1.7, phase=0.4)
+    for i, (yy, rt, rb) in enumerate([(1.12, 0.19, 0.22), (0.98, 0.215, 0.24), (0.84, 0.225, 0.25), (0.72, 0.215, 0.235)]):
+        m.strands(11, rt, rb, yy, 0.17, 0.13, ["spider", "coral"] if i % 2 else ["coral", "spider"], phase=i * 0.4, thick=0.025)
     m.ico(0.13, (0, 1.12, -0.13), "spider", scale=(1.2, 0.8, 0.8))
     for s in (-1, 1):
         eye = [(0.0, 0.0), (0.11, 0.06), (0.1, -0.03), (0.03, -0.07)]
-        m.prism([(s * p[0], p[1]) for p in eye], 0.03, (s * 0.02, 0.95, 0.205), "black", rot=(-0.12, 0, 0))
-        m.prism([(s * (p[0] * 0.62 + 0.02), p[1] * 0.62 - 0.003) for p in eye], 0.04, (s * 0.02, 0.95, 0.21), "white", rot=(-0.12, 0, 0))
-    m.box(0.012, 0.3, 0.02, (0, 0.92, 0.215), "black", rot=(-0.12, 0, 0))
+        m.prism([(s * p[0] * 1.25, p[1] * 1.25) for p in eye], 0.03, (s * 0.025, 0.93, 0.275), "black", rot=(-0.1, 0, 0))
+        m.prism([(s * (p[0] * 0.78 + 0.025), p[1] * 0.78 - 0.004) for p in eye], 0.04, (s * 0.025, 0.93, 0.28), "white", rot=(-0.1, 0, 0))
     for s in (-1, 1):
         m.cyl(0.06, 0.08, 0.42, 6, (s * 0.3, 1.13, 0.02), "spider", rot=(0, 0, s * 2.35))
-        m.spikes(5, 0.07, 1.27, 0.045, 0.1, "coral", center=(s * 0.44, 0.02), tilt=1.2)
+        m.strands(7, 0.075, 0.1, 1.25, 0.11, 0.09, ["coral", "spider"], center=(s * 0.41, 0.02), thick=0.02)
         m.ico(0.055, (s * 0.47, 1.31, 0.03), "skin")
     m.cyl(0.055, 0.055, 0.07, 6, (0, 1.17, 0), "skin")
     m.ico(0.14, (0, 1.31, 0), "skin", scale=(1, 1.05, 0.96))
