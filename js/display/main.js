@@ -23,7 +23,7 @@ export async function startDisplay(root, canvas) {
     <div class="tv-title"><b>OŚRODEK DAJE</b><span>LAB 01 · hole physics</span></div>
     <div class="tv-players" id="tv-players"></div>
     <div class="tv-join" id="tv-join"><div class="qr" id="tv-qr"></div><div class="join-text"><span>JOIN</span><b id="tv-code">····</b><small id="tv-net">starting…</small></div></div>
-    <div class="tv-hint" id="tv-hint">Click the grass for a mouse hole · hold SPACE to spit · B adds a bot · P opens the lab panel</div>
+    <div class="tv-hint" id="tv-hint">Click the grass for a mouse hole · hold SPACE, release to spit straight up · B adds a bot · P opens the lab panel</div>
     <div class="tv-overlay" id="tv-overlay"></div>
     <div class="tv-loading" id="tv-loading">Loading physics…</div>`;
   root.hidden = false;
@@ -148,6 +148,8 @@ export async function startDisplay(root, canvas) {
       } else if (e.type === "element") {
         if (e.element === "water") sfx.splash();
         if (e.element === "fire") sfx.ignite();
+      } else if (e.type === "drained") {
+        fx.burst(e.x, 0.05, e.z, 14, { color: ["#1e9bf0", "#7fd0ff"], speed: 1.5, up: 1.5, size: 0.09, radius: e.r });
       } else if (e.type === "fountain") {
         sfx.fountain();
       } else if (e.type === "fuse") {

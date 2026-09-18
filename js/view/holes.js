@@ -118,7 +118,7 @@ export function createHoleView(scene, color) {
         charge.visible = true;
       } else charge.visible = false;
 
-      waterLevel += ((hole.element === "water" ? 1 : 0) - waterLevel) * Math.min(1, dt * 5);
+      waterLevel += ((hole.element === "water" ? Math.min(1, 0.25 + hole.elT / 3.5) : 0) - waterLevel) * Math.min(1, dt * 5);
       water.visible = shine.visible = waterLevel > 0.02;
       water.position.y = -1.2 + waterLevel * 1.12 + Math.sin(t * 2.4) * 0.015;
       shine.position.set(Math.sin(t * 0.9) * 0.2, water.position.y + 0.01, Math.cos(t * 0.7) * 0.2);

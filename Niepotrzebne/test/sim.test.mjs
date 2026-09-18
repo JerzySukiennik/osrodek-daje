@@ -78,22 +78,33 @@ function place(sim, id, x, z, r) {
   const before = h.r;
   sim.setInput("a", { x: 0, y: 0, b: 1 });
   run(sim, 0.5);
-  sim.setInput("a", { x: 1, y: 0, b: 0 });
+  sim.setInput("a", { x: 0, y: 0, b: 0 });
   run(sim, 0.1);
   sim.setInput("a", { x: 0, y: 0, b: 0 });
   const spat = sim.drainEvents().find((e) => e.type === "spit");
   let peak = 0;
-  let prop = spat ? sim.props.get(spat.id) : null;
-  run(sim, 3, () => { if (prop && !prop.dead) peak = Math.max(peak, prop.body.translation().y); });
-  const landed = prop && !prop.dead ? prop.body.translation() : null;
-  check("spit launches the crate out and it lands outside the hole",
-    !!spat && peak > 1.5 && landed && Math.hypot(landed.x - h.x, landed.z - h.z) > h.r && landed.y > -0.1,
-    `peak ${peak.toFixed(2)} m, landed ${landed ? Math.hypot(landed.x - h.x, landed.z - h.z).toFixed(2) : "?"} m away`);
-  if (prop && !prop.dead) {
-    h.x = landed.x; h.z = landed.z;
-    run(sim, 2);
-    check("re-swallowing a spat prop gives no growth", Math.abs(h.r - before) < 1e-6 && prop.dead, `r ${before.toFixed(3)} → ${h.r.toFixed(3)}`);
-  }
+  let drift = 0;
+  const prop = spat ? sim.props.get(spat.id) : null;
+  run(sim, 3, () => {
+    if (prop && !prop.dead) {
+      const t = prop.body.translation();
+      peak = Math.max(peak, t.y);
+      drift = Math.max(drift, Math.hypot(t.x - h.x, t.z - h.z));
+    }
+  });
+  check("spit tosses the crate straight up", !!spat && peak > 1.5 && drift < 0.25, `peak ${peak.toFixed(2)} m, sideways drift ${drift.toFixed(2)} m`);
+  check("it falls straight back into the hole with no growth", !!prop && prop.dead && h.belly.length === 1 && Math.abs(h.r - before) < 1e-6, `belly ${h.belly.length}, r ${before.toFixed(3)} → ${h.r.toFixed(3)}`);
+}
+
+{
+  const sim = createSim(RAPIER, [], TUNE);
+  const h = place(sim, "a", -8.6, 4.6, 0.9);
+  run(sim, 0.2);
+  h.x = 0; h.z = 0;
+  run(sim, TUNE.waterTime - 1);
+  const still = h.element === "water";
+  run(sim, 1.5);
+  check("water drains by itself a few seconds after leaving the pond", still && h.element === null);
 }
 
 {

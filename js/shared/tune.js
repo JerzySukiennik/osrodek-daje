@@ -1,23 +1,24 @@
 // Live-tunable gameplay constants; the lab panel edits this object in place and saves overrides to localStorage.
 
 export const TUNE_DEFAULTS = {
-  gravity: 22,
+  gravity: 27.5,
   holeStartR: 0.45,
   holeSpeed: 4.6,
   holeAccel: 9,
   speedPerR: 0.22,
   growth: 1,
   swallowDepth: 0.55,
-  spitApex: 2.4,
-  spitApexCharge: 3.2,
-  spitRange: 0.9,
-  spitRangeCharge: 5.5,
+  spitApex: 2.2,
+  spitApexCharge: 4.5,
+  spitRange: 0,
+  spitRangeCharge: 0,
   spitChargeS: 0.8,
   fireTime: 22,
   burnTime: 3.2,
   fireReach: 0.55,
   spreadChance: 0.22,
   fountainS: 1.1,
+  waterTime: 7,
   friction: 0.9,
   propDamping: 0.15
 };
@@ -32,21 +33,22 @@ export const TUNE_META = {
   swallowDepth: { min: 0.2, max: 1.5, step: 0.05, label: "Swallow depth" },
   spitApex: { min: 0.5, max: 6, step: 0.1, label: "Spit height (tap)" },
   spitApexCharge: { min: 0, max: 8, step: 0.1, label: "Spit height (+charged)" },
-  spitRange: { min: 0.2, max: 4, step: 0.1, label: "Spit range (tap)" },
-  spitRangeCharge: { min: 0, max: 12, step: 0.1, label: "Spit range (+charged)" },
+  spitRange: { min: 0, max: 4, step: 0.1, label: "Spit sideways (tap)" },
+  spitRangeCharge: { min: 0, max: 12, step: 0.1, label: "Spit sideways (+charged)" },
   spitChargeS: { min: 0.2, max: 2, step: 0.05, label: "Charge time" },
   fireTime: { min: 4, max: 60, step: 1, label: "Fire duration" },
   burnTime: { min: 0.8, max: 10, step: 0.1, label: "Burn time" },
   fireReach: { min: 0.1, max: 2, step: 0.05, label: "Fire reach" },
   spreadChance: { min: 0, max: 1, step: 0.05, label: "Fire spread chance" },
   fountainS: { min: 0.3, max: 3, step: 0.1, label: "Fountain length" },
+  waterTime: { min: 1, max: 30, step: 0.5, label: "Water lasts outside pond" },
   friction: { min: 0.1, max: 1.5, step: 0.05, label: "Friction (reset)" },
   propDamping: { min: 0, max: 1, step: 0.05, label: "Prop damping (reset)" }
 };
 
 export const TUNE = { ...TUNE_DEFAULTS };
 
-const KEY = "osrodek.lab1.tune";
+const KEY = "osrodek.lab1b.tune";
 
 export function loadTune() {
   try {

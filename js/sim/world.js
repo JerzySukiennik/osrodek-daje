@@ -131,7 +131,7 @@ export function createSim(RAPIER, levelItems, TUNE) {
   function setElement(hole, element) {
     if (hole.element === element) return;
     hole.element = element;
-    hole.elT = element === "fire" ? TUNE.fireTime : 0;
+    hole.elT = element === "fire" ? TUNE.fireTime : element === "water" ? TUNE.waterTime : 0;
     emit("element", { hole: hole.id, element });
   }
 
@@ -163,7 +163,15 @@ export function createSim(RAPIER, levelItems, TUNE) {
       hole.elT -= dt;
       if (hole.elT <= 0) setElement(hole, null);
     }
-    if (hole.elLock <= 0 && inPond(hole.x, hole.z)) {
+    const wet = inPond(hole.x, hole.z);
+    if (hole.element === "water") {
+      if (wet) hole.elT = TUNE.waterTime;
+      else {
+        hole.elT -= dt;
+        if (hole.elT <= 0) { setElement(hole, null); emit("drained", { hole: hole.id, x: hole.x, z: hole.z, r: hole.r }); }
+      }
+    }
+    if (hole.elLock <= 0 && wet) {
       if (hole.element === "fire") steam(hole);
       else if (hole.element !== "water") setElement(hole, "water");
     }
@@ -186,13 +194,14 @@ export function createSim(RAPIER, levelItems, TUNE) {
     const g = TUNE.gravity;
     const vy = Math.sqrt(2 * g * (apex - startY));
     const tTotal = (vy + Math.sqrt(2 * g * apex)) / g;
-    const dist = hole.r + def.radius + TUNE.spitRange + TUNE.spitRangeCharge * power;
-    const vh = dist / tTotal;
+    const side = TUNE.spitRange + TUNE.spitRangeCharge * power;
+    const vh = side > 0.01 ? (hole.r + def.radius + side) / tTotal : 0;
     const prop = spawnProp(type, hole.x, hole.z, Math.random() * 6.28, startY, { loose: true, counted: true });
     prop.body.setLinvel({ x: hole.dirX * vh, y: vy, z: hole.dirZ * vh }, true);
-    prop.body.setAngvel({ x: (Math.random() - 0.5) * 5, y: (Math.random() - 0.5) * 3, z: (Math.random() - 0.5) * 5 }, true);
+    const spin = vh > 0 ? 5 : 1.2;
+    prop.body.setAngvel({ x: (Math.random() - 0.5) * spin, y: (Math.random() - 0.5) * 3, z: (Math.random() - 0.5) * spin }, true);
     prop.ghostUntil = time + Math.min(0.35, (-startY + 0.15) / vy + 0.05);
-    prop.noSwallowUntil = time + 0.7;
+    prop.noSwallowUntil = time + vy / g;
     prop.near = true;
     setGroups(prop, GROUPS.ghost);
     emit("spit", { hole: hole.id, id: prop.id, prop: type, x: hole.x, z: hole.z, power });

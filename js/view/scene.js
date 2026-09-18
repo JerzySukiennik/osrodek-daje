@@ -87,7 +87,8 @@ function arenaShape(grow) {
 
 export function createView(canvas) {
   const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, stencil: true, powerPreference: "high-performance" });
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+  const fitRatio = () => Math.min(window.devicePixelRatio || 1, 2, Math.max(1, Math.sqrt(2600000 / (window.innerWidth * window.innerHeight))));
+  renderer.setPixelRatio(fitRatio());
   renderer.outputColorSpace = THREE.SRGBColorSpace;
   renderer.toneMapping = THREE.NoToneMapping;
   renderer.shadowMap.enabled = true;
@@ -151,6 +152,7 @@ export function createView(canvas) {
   function resize() {
     const w = canvas.clientWidth || window.innerWidth;
     const h = canvas.clientHeight || window.innerHeight;
+    renderer.setPixelRatio(fitRatio());
     renderer.setSize(w, h, false);
     camera.aspect = w / h;
     const vfov = (camera.fov * Math.PI) / 180;

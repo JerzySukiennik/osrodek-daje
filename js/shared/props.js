@@ -18,7 +18,7 @@ const HALF_PI = Math.PI / 2;
 
 export const PROPS = {
   tuft: {
-    label: "Grass tuft", grow: 0.02, density: 0.4, flammable: true, burn: 0.8,
+    label: "Grass tuft", grow: 0.05, density: 0.4, flammable: true, burn: 0.8,
     parts: [
       box(0.12, 0.1, 0.12, 0, 0.05, 0, P.leafLight),
       cone(0.05, 0.34, 0, 0.17, 0, P.leafLight, { nc: true, seg: 4 }),
@@ -27,7 +27,7 @@ export const PROPS = {
     ]
   },
   flower: {
-    label: "Flower", grow: 0.02, density: 0.4, flammable: true, burn: 0.8,
+    label: "Flower", grow: 0.05, density: 0.4, flammable: true, burn: 0.8,
     parts: [
       box(0.1, 0.08, 0.1, 0, 0.04, 0, P.leaf),
       cyl(0.015, 0.3, 0, 0.2, 0, P.leafDark, { nc: true, seg: 5 }),
@@ -36,19 +36,19 @@ export const PROPS = {
     ]
   },
   pebble: {
-    label: "Pebble", grow: 0.03, density: 2.2,
+    label: "Pebble", grow: 0.07, density: 2.2,
     parts: [ball(0.12, 0, 0.1, 0, P.stone, { squash: 0.75 })]
   },
   mushroom: {
-    label: "Mushroom", grow: 0.03, density: 0.6,
+    label: "Mushroom", grow: 0.07, density: 0.6,
     parts: [cyl(0.05, 0.16, 0, 0.08, 0, P.cream, { seg: 7 }), cone(0.15, 0.13, 0, 0.22, 0, P.red, { seg: 8 })]
   },
   apple: {
-    label: "Apple", grow: 0.02, density: 0.9,
+    label: "Apple", grow: 0.06, density: 0.9,
     parts: [ball(0.09, 0, 0.09, 0, P.red), cyl(0.012, 0.06, 0, 0.2, 0, P.woodDark, { nc: true, seg: 4 })]
   },
   duck: {
-    label: "Rubber duck", grow: 0.05, density: 0.3, floats: true,
+    label: "Rubber duck", grow: 0.1, density: 0.3, floats: true,
     parts: [
       ball(0.15, 0, 0.13, 0, P.yellow, { squash: 0.8 }),
       ball(0.09, 0.09, 0.3, 0, P.yellow, { nc: true }),
@@ -56,15 +56,15 @@ export const PROPS = {
     ]
   },
   bucket: {
-    label: "Bucket", grow: 0.06, density: 0.5,
+    label: "Bucket", grow: 0.14, density: 0.5,
     parts: [cyl(0.13, 0.3, 0, 0.15, 0, P.blue, { rTop: 0.18, seg: 10 })]
   },
   ball: {
-    label: "Beach ball", grow: 0.1, density: 0.08, floats: true, bounce: 0.75,
+    label: "Beach ball", grow: 0.2, density: 0.08, floats: true, bounce: 0.75,
     parts: [ball(0.28, 0, 0.28, 0, P.white), ball(0.2, 0, 0.38, 0, P.red, { nc: true, squash: 0.8 })]
   },
   firework: {
-    label: "Firework", grow: 0.05, density: 0.5, firework: true,
+    label: "Firework", grow: 0.1, density: 0.5, firework: true,
     parts: [
       cyl(0.07, 0.5, 0, 0.25, 0, P.red, { seg: 8 }),
       cone(0.1, 0.2, 0, 0.6, 0, P.yellow, { nc: true, seg: 8 }),
@@ -76,7 +76,7 @@ export const PROPS = {
     parts: [box(0.2, 0.16, 0.18, 0, 0.08, 0, P.char)]
   },
   log: {
-    label: "Log", grow: 0.15, density: 0.7, flammable: true, floats: true,
+    label: "Log", grow: 0.3, density: 0.7, flammable: true, floats: true,
     parts: [
       box(1.0, 0.27, 0.27, 0, 0.145, 0, P.wood, { nv: true }),
       cyl(0.15, 1.0, 0, 0.15, 0, P.wood, { rot: [0, 0, HALF_PI], seg: 8, nc: true }),
@@ -84,7 +84,7 @@ export const PROPS = {
     ]
   },
   crate: {
-    label: "Crate", grow: 0.25, density: 0.5, flammable: true, floats: true,
+    label: "Crate", grow: 0.45, density: 0.5, flammable: true, floats: true,
     parts: [
       box(0.6, 0.6, 0.6, 0, 0.3, 0, P.woodLight),
       box(0.64, 0.1, 0.64, 0, 0.06, 0, P.wood, { nc: true }),
@@ -92,7 +92,7 @@ export const PROPS = {
     ]
   },
   campfire: {
-    label: "Campfire", grow: 0.3, density: 1.2, fireSource: true,
+    label: "Campfire", grow: 0.5, density: 1.2, fireSource: true,
     parts: [
       cyl(0.5, 0.16, 0, 0.08, 0, P.stoneDark, { seg: 9 }),
       cyl(0.36, 0.18, 0, 0.09, 0, P.char, { seg: 9, nc: true }),
@@ -102,7 +102,7 @@ export const PROPS = {
     ]
   },
   bench: {
-    label: "Bench", grow: 0.35, density: 0.6, flammable: true, floats: true,
+    label: "Bench", grow: 0.6, density: 0.6, flammable: true, floats: true,
     parts: [
       box(1.5, 0.08, 0.4, 0, 0.45, 0, P.wood),
       box(0.1, 0.42, 0.34, -0.6, 0.21, 0, P.woodDark),
@@ -110,7 +110,7 @@ export const PROPS = {
     ]
   },
   deckchair: {
-    label: "Deckchair", grow: 0.4, density: 0.4, flammable: true,
+    label: "Deckchair", grow: 0.7, density: 0.4, flammable: true,
     parts: [
       box(0.62, 0.06, 1.25, 0, 0.36, 0.1, P.coral, { rot: [-0.42, 0, 0] }),
       box(0.62, 0.06, 0.25, 0, 0.36, 0.1, P.white, { rot: [-0.42, 0, 0], nc: true }),
@@ -119,7 +119,7 @@ export const PROPS = {
     ]
   },
   barrel: {
-    label: "Barrel", grow: 0.4, density: 0.7, floats: true,
+    label: "Barrel", grow: 0.7, density: 0.7, floats: true,
     parts: [
       cyl(0.36, 0.9, 0, 0.45, 0, P.navy, { seg: 12 }),
       cyl(0.38, 0.08, 0, 0.22, 0, P.metal, { seg: 12, nc: true }),
@@ -127,7 +127,7 @@ export const PROPS = {
     ]
   },
   grill: {
-    label: "Grill", grow: 0.5, density: 0.8, fireSource: true,
+    label: "Grill", grow: 0.8, density: 0.8, fireSource: true,
     parts: [
       cyl(0.4, 0.3, 0, 0.78, 0, P.black, { rTop: 0.42, seg: 12 }),
       cyl(0.035, 0.66, 0.2, 0.33, 0.12, P.metalDark, { seg: 5 }),
@@ -137,7 +137,7 @@ export const PROPS = {
     ]
   },
   parasol: {
-    label: "Parasol", grow: 0.6, density: 0.35, anchored: true, flammable: true,
+    label: "Parasol", grow: 1.0, density: 0.35, anchored: true, flammable: true,
     parts: [
       cyl(0.04, 2.3, 0, 1.15, 0, P.white, { seg: 6 }),
       cone(1.15, 0.5, 0, 2.3, 0, P.yellow, { seg: 8 }),
@@ -145,7 +145,7 @@ export const PROPS = {
     ]
   },
   bush: {
-    label: "Bush", grow: 0.5, density: 0.3, flammable: true,
+    label: "Bush", grow: 0.8, density: 0.3, flammable: true,
     parts: [
       ball(0.55, 0, 0.45, 0, P.leaf, { squash: 0.85 }),
       ball(0.38, 0.35, 0.4, 0.2, P.leafDark, { nc: true }),
@@ -153,7 +153,7 @@ export const PROPS = {
     ]
   },
   fence: {
-    label: "Fence", grow: 0.4, density: 0.5, anchored: true, flammable: true,
+    label: "Fence", grow: 0.6, density: 0.5, anchored: true, flammable: true,
     parts: [
       box(0.12, 0.95, 0.12, -0.95, 0.475, 0, P.woodDark),
       box(0.12, 0.95, 0.12, 0.95, 0.475, 0, P.woodDark),
@@ -191,7 +191,7 @@ export const PROPS = {
     ]
   },
   pine: {
-    label: "Pine", grow: 1.6, density: 0.4, anchored: true, flammable: true, burn: 5,
+    label: "Pine", grow: 2.2, density: 0.4, anchored: true, flammable: true, burn: 5,
     parts: [
       cyl(0.18, 1.4, 0, 0.7, 0, P.woodDark, { seg: 6 }),
       cone(1.2, 1.7, 0, 1.75, 0, P.leafDark, { seg: 7 }),
