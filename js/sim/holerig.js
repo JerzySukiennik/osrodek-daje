@@ -34,6 +34,7 @@ export function createHoleRig(RAPIER, world, margin, friction) {
       const desc = RAPIER.ColliderDesc.cuboid(0.5, DEPTH / 2, 0.5)
         .setCollisionGroups(GROUPS.patch)
         .setFriction(friction)
+        .setFrictionCombineRule(RAPIER.CoefficientCombineRule.Min)
         .setRestitution(0)
         .setEnabled(false);
       const col = world.createCollider(desc, body);

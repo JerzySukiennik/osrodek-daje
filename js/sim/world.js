@@ -71,7 +71,7 @@ export function createSim(RAPIER, levelItems, TUNE) {
     }
     const prop = {
       id: nextId++, type, def, body, anchored, near: false, ghostUntil: 0, noSwallowUntil: 0,
-      counted: !!opts.counted, burning: null, fuse: null, thrust: null, dead: false
+      counted: !!opts.counted, burning: null, fuse: null, thrust: null, dead: false, stuck: 0
     };
     props.set(prop.id, prop);
     emit("spawn", { id: prop.id, prop: type });
@@ -101,7 +101,7 @@ export function createSim(RAPIER, levelItems, TUNE) {
       id, color, slot, x: sp[0], z: sp[1], vx: 0, vz: 0, ix: 0, iy: 0, btn: false, wasBtn: false,
       charge: 0, r, area: Math.PI * r * r, dirX: 0, dirZ: -1, belly: [], eaten: 0,
       element: null, elT: 0, elLock: 0, fountainT: 0, moved: false,
-      rig: createHoleRig(RAPIER, world, RIG_MARGIN, TUNE.friction)
+      rig: createHoleRig(RAPIER, world, RIG_MARGIN, TUNE.rimFriction)
     };
     holes.set(id, hole);
     emit("holeAdd", { hole: id });
@@ -381,6 +381,26 @@ export function createSim(RAPIER, levelItems, TUNE) {
         body.setAngvel({ x: w.x * 0.94, y: w.y * 0.98, z: w.z * 0.94 }, true);
         continue;
       }
+      let over = inside;
+      if (!over && t.y < -0.04) {
+        for (const h of holeList) if (Math.hypot(com.x - h.x, com.z - h.z) < h.r + prop.def.radius) { over = h; break; }
+      }
+      if (over && (com.y < 0.12 || t.y < -0.04) && time >= prop.noSwallowUntil && !(over.element === "water" && prop.def.floats)) {
+        const m = body.mass();
+        const dx = over.x - com.x, dz = over.z - com.z;
+        const d = Math.hypot(dx, dz) || 1;
+        const pull = TUNE.suction * Math.min(1, d / Math.max(0.15, over.r));
+        body.applyImpulse({ x: (dx / d) * pull * m * dt, y: -TUNE.suction * 0.6 * m * dt, z: (dz / d) * pull * m * dt }, true);
+        const v = body.linvel();
+        if (Math.hypot(v.x, v.y, v.z) < 0.35) prop.stuck += dt; else prop.stuck = Math.max(0, prop.stuck - dt * 2);
+        if (prop.stuck > 0.45) {
+          prop.stuck = 0.2;
+          const k = m * prop.def.radius * 3.5;
+          body.applyTorqueImpulse({ x: (Math.random() - 0.5) * k, y: (Math.random() - 0.5) * k * 0.5, z: (Math.random() - 0.5) * k }, true);
+          body.applyImpulse({ x: (dx / d) * m * 1.2, y: m * 1.5, z: (dz / d) * m * 1.2 }, true);
+          emit("nudge", { id: prop.id });
+        }
+      } else prop.stuck = 0;
       const depth = Math.max(TUNE.swallowDepth, prop.def.radius * 0.55);
       if (inside && com.y < -depth && time >= prop.noSwallowUntil) {
         swallow(inside, prop, com);

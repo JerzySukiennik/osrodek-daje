@@ -4,8 +4,9 @@ import * as THREE from "three";
 import { ARENA, POND, DECALS } from "../shared/level.js";
 
 export const COLORS = {
-  sky: "#19c2ff", outside: "#15a04a", grass: "#7ddc2c", grassEdge: "#52c234",
-  pond: "#1786f2", pondLight: "#3fb3ff", pondShore: "#ffe08a"
+  skyTop: "#6ec6ff", skyLow: "#ffe3b8", outside: "#a4cf3e", grass: "#c6e344", grassEdge: "#aed53c",
+  pond: "#1c8df0", pondLight: "#55bcff", pondShore: "#ffdf8e",
+  hills: ["#7fae3c", "#9cc48f", "#c3dcd6"]
 };
 
 export function groundMaterial(color, opts = {}) {
@@ -95,33 +96,46 @@ export function createView(canvas) {
   renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 
   const scene = new THREE.Scene();
-  scene.background = new THREE.Color(COLORS.outside);
+  const skyCanvas = document.createElement("canvas");
+  skyCanvas.width = 4;
+  skyCanvas.height = 256;
+  const skyCtx = skyCanvas.getContext("2d");
+  const grad = skyCtx.createLinearGradient(0, 0, 0, 256);
+  grad.addColorStop(0, COLORS.skyTop);
+  grad.addColorStop(0.42, COLORS.skyLow);
+  grad.addColorStop(1, COLORS.skyLow);
+  skyCtx.fillStyle = grad;
+  skyCtx.fillRect(0, 0, 4, 256);
+  const skyTex = new THREE.CanvasTexture(skyCanvas);
+  skyTex.colorSpace = THREE.SRGBColorSpace;
+  scene.background = skyTex;
+  scene.fog = new THREE.Fog(COLORS.skyLow, 78, 190);
 
   const camera = new THREE.PerspectiveCamera(26, 16 / 9, 1, 300);
-  const camDir = new THREE.Vector3(0, 0.8, 0.6).normalize();
+  const camDir = new THREE.Vector3(0, 0.66, 0.75).normalize();
   const camTarget = new THREE.Vector3(0, 0, 0.6);
   const shake = { t: 0, amp: 0 };
 
-  scene.add(new THREE.HemisphereLight(0xffffff, 0x3aa84a, 1.35));
-  const sun = new THREE.DirectionalLight(0xfff2d6, 2.1);
-  sun.position.set(-10, 22, 9);
+  scene.add(new THREE.HemisphereLight(0xf3eeff, 0xb7a2ff, 1.75));
+  const sun = new THREE.DirectionalLight(0xffe2b5, 1.9);
+  sun.position.set(-19, 15, 11);
   sun.castShadow = true;
   sun.shadow.mapSize.set(2048, 2048);
-  sun.shadow.camera.left = -20;
-  sun.shadow.camera.right = 20;
-  sun.shadow.camera.top = 16;
-  sun.shadow.camera.bottom = -16;
+  sun.shadow.camera.left = -24;
+  sun.shadow.camera.right = 24;
+  sun.shadow.camera.top = 20;
+  sun.shadow.camera.bottom = -20;
   sun.shadow.camera.near = 1;
-  sun.shadow.camera.far = 70;
+  sun.shadow.camera.far = 90;
   sun.shadow.bias = -0.0006;
   sun.shadow.normalBias = 0.035;
-  sun.shadow.radius = 5;
+  sun.shadow.radius = 8;
   scene.add(sun);
 
   const ground = new THREE.Group();
   scene.add(ground);
 
-  const outsideGeo = new THREE.PlaneGeometry(400, 400);
+  const outsideGeo = new THREE.PlaneGeometry(900, 900);
   outsideGeo.rotateX(-Math.PI / 2);
   const outside = new THREE.Mesh(outsideGeo, groundMaterial(COLORS.outside));
   outside.position.y = -0.03;
@@ -149,6 +163,23 @@ export function createView(canvas) {
   const pondInner = flat(ellipseShape(POND.x - 0.5, POND.z - 0.3, POND.rx * 0.55, POND.rz * 0.5, 9, 0.2, 23), 0.06, COLORS.pondLight, -3);
   ground.add(pondInner);
 
+  const hillRnd = mulberry(77);
+  COLORS.hills.forEach((color, i) => {
+    const shape = new THREE.Shape();
+    const half = 170 + i * 60;
+    shape.moveTo(-half, -2);
+    const n = 16 - i * 3;
+    for (let k = 0; k <= n; k++) {
+      const x = -half + (k / n) * half * 2;
+      const peak = (k % 2 ? 1 : 0.45) * (7 + i * 9) * (0.6 + hillRnd() * 0.8);
+      shape.lineTo(x, peak);
+    }
+    shape.lineTo(half, -2);
+    const hill = new THREE.Mesh(new THREE.ShapeGeometry(shape), new THREE.MeshBasicMaterial({ color, fog: true }));
+    hill.position.set(0, 0, -34 - i * 38);
+    scene.add(hill);
+  });
+
   function resize() {
     const w = canvas.clientWidth || window.innerWidth;
     const h = canvas.clientHeight || window.innerHeight;
@@ -158,7 +189,7 @@ export function createView(canvas) {
     const vfov = (camera.fov * Math.PI) / 180;
     const hfov = 2 * Math.atan(Math.tan(vfov / 2) * camera.aspect);
     const needW = (ARENA.hx + 1.6) / Math.tan(hfov / 2);
-    const needH = ((ARENA.hz + 2.2) * 0.86) / Math.tan(vfov / 2);
+    const needH = ((ARENA.hz + 2.4) * 0.74) / Math.tan(vfov / 2);
     const dist = Math.max(needW, needH) + 6;
     camera.position.copy(camTarget).addScaledVector(camDir, dist);
     camera.lookAt(camTarget);

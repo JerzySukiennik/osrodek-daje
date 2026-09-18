@@ -20,6 +20,8 @@ export const TUNE_DEFAULTS = {
   fountainS: 1.1,
   waterTime: 7,
   friction: 0.9,
+  rimFriction: 0.25,
+  suction: 16,
   propDamping: 0.15
 };
 
@@ -43,6 +45,8 @@ export const TUNE_META = {
   fountainS: { min: 0.3, max: 3, step: 0.1, label: "Fountain length" },
   waterTime: { min: 1, max: 30, step: 0.5, label: "Water lasts outside pond" },
   friction: { min: 0.1, max: 1.5, step: 0.05, label: "Friction (reset)" },
+  rimFriction: { min: 0, max: 1, step: 0.05, label: "Rim slipperiness (reset)" },
+  suction: { min: 0, max: 60, step: 1, label: "Suction on sunk props" },
   propDamping: { min: 0, max: 1, step: 0.05, label: "Prop damping (reset)" }
 };
 

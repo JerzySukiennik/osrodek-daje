@@ -9,12 +9,15 @@ export const POND = { x: -8.6, z: 4.6, rx: 4.1, rz: 3.0 };
 export const SPAWNS = [[-1.5, 6.6], [1.5, 6.6], [-4, 7.2], [4, 7.2]];
 
 export const DECALS = [
-  { kind: "path", pts: [[14, 2.2], [6, 2.6], [2, 0.2], [2.4, -5.2], [6.2, -6.2], [6.4, -4.4], [4, -4], [3.9, -0.4], [6.6, 4.2], [14, 4.2]], color: "#ffd85a" },
-  { kind: "blob", x: 0.4, z: 1.2, r: 2.6, color: "#f5b942", seed: 3 },
-  { kind: "blob", x: -11, z: -5.2, r: 2.0, color: "#b8bfd6", seed: 5 },
-  { kind: "blob", x: 5, z: 4, r: 3.0, color: "#a8ec3a", seed: 8 },
-  { kind: "blob", x: -4, z: -3, r: 3.6, color: "#a8ec3a", seed: 11 },
-  { kind: "blob", x: 9, z: -6, r: 3.4, color: "#5fcf2e", seed: 14 }
+  { kind: "path", pts: [[14, 2.2], [6, 2.6], [2, 0.2], [2.4, -5.2], [6.2, -6.2], [6.4, -4.4], [4, -4], [3.9, -0.4], [6.6, 4.2], [14, 4.2]], color: "#f6c453" },
+  { kind: "blob", x: 0.4, z: 1.2, r: 2.6, color: "#e7a63c", seed: 3 },
+  { kind: "blob", x: -11, z: -5.2, r: 2.0, color: "#c9cbdc", seed: 5 },
+  { kind: "blob", x: 5, z: 4, r: 3.0, color: "#d3e655", seed: 8 },
+  { kind: "blob", x: -4, z: -3, r: 3.6, color: "#d3e655", seed: 11 },
+  { kind: "blob", x: 9, z: -6, r: 3.4, color: "#9fca34", seed: 14 },
+  { kind: "blob", x: -9, z: -1.5, r: 3.2, color: "#9fca34", seed: 17 },
+  { kind: "blob", x: 1, z: 6.4, r: 2.8, color: "#cfe24f", seed: 19 },
+  { kind: "blob", x: 11.5, z: 6.5, r: 2.4, color: "#9fca34", seed: 23 }
 ];
 
 export function inPond(x, z, pad = 0) {
