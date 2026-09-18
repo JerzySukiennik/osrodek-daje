@@ -7,7 +7,8 @@ import { PROPS } from "../shared/props.js";
 import { MSG, PROTO, MAX_PLAYERS, PLAYER_COLORS, PLAYER_NAMES } from "../shared/protocol.js";
 import { createSim } from "../sim/world.js";
 import { createView } from "../view/scene.js";
-import { createPropMesh, propMaterial, burnMaterial } from "../view/propmesh.js";
+import { createPropMesh, propMaterial, burnMaterial, useModelGeometries } from "../view/propmesh.js";
+import { loadModelGeometries } from "../view/models.js";
 import { createHoleView } from "../view/holes.js";
 import { createFx } from "../view/fx.js";
 import { sfx, unlockAudio } from "../view/audio.js";
@@ -20,7 +21,7 @@ export async function startDisplay(root, canvas) {
   const params = new URLSearchParams(location.search);
 
   root.innerHTML = `
-    <div class="tv-title"><b>OŚRODEK DAJE</b><span>LAB 01 · hole physics</span></div>
+    <div class="tv-title"><b>OŚRODEK DAJE</b><span>LAB 02 · characters & props</span></div>
     <div class="tv-players" id="tv-players"></div>
     <div class="tv-join" id="tv-join"><div class="qr" id="tv-qr"></div><div class="join-text"><span>JOIN</span><b id="tv-code">····</b><small id="tv-net">starting…</small></div></div>
     <div class="tv-hint" id="tv-hint">Click the grass for a mouse hole · hold SPACE, release to spit straight up · B adds a bot · P opens the lab panel</div>
@@ -31,6 +32,15 @@ export async function startDisplay(root, canvas) {
 
   const RAPIER = (await import(RAPIER_URL)).default;
   await RAPIER.init();
+
+  let modelCount = 0;
+  try {
+    const models = await loadModelGeometries("assets/models.glb");
+    useModelGeometries(models);
+    modelCount = models.size;
+  } catch (e) {
+    console.warn("models.glb failed to load, falling back to primitives", e);
+  }
 
   const view = createView(canvas);
   const fx = createFx(view.scene, view.camera, root.querySelector("#tv-overlay"));
@@ -481,7 +491,7 @@ export async function startDisplay(root, canvas) {
 
   window.__lab = {
     get sim() { return sim; },
-    players, stats, view, addBot, removeBots, resetLevel, addPlayer, removePlayer,
+    players, stats, view, modelCount, addBot, removeBots, resetLevel, addPlayer, removePlayer,
     advance(seconds) { stepSim(Math.round(seconds * 60)); syncMeshes(); }
   };
 }

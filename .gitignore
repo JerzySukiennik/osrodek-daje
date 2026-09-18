@@ -3,3 +3,5 @@ reference/
 feedback/*.json
 .DS_Store
 .env
+Niepotrzebne/blender/renders/
+__pycache__/

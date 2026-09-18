@@ -11,10 +11,12 @@ const RATINGS = [
   ["fire", "Fire"],
   ["water", "Water"],
   ["look", "Look & colours"],
+  ["characters", "Characters (KS, Ryś, Jurek, Dropsik)"],
+  ["models", "Prop models"],
   ["pad", "Phone pad"]
 ];
 
-const KEY = "osrodek.lab1.feedback";
+const KEY = "osrodek.lab2.feedback";
 
 export function createPanel(root, api) {
   let state = { ratings: {}, notes: "", issues: [] };
@@ -126,7 +128,7 @@ export function createPanel(root, api) {
     const changed = {};
     for (const k of Object.keys(TUNE_DEFAULTS)) if (TUNE[k] !== TUNE_DEFAULTS[k]) changed[k] = TUNE[k];
     const payload = {
-      phase: "lab-01", savedAt: new Date().toISOString(), ratings: state.ratings, notes: state.notes,
+      phase: "lab-02", savedAt: new Date().toISOString(), ratings: state.ratings, notes: state.notes,
       issues: state.issues, tuneChanged: changed, tune: { ...TUNE }, session: api.getSnapshot(),
       screen: `${innerWidth}x${innerHeight}`, stats: { ...api.getStats() }
     };
@@ -139,7 +141,7 @@ export function createPanel(root, api) {
     } catch (e) {
       const a = document.createElement("a");
       a.href = URL.createObjectURL(new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" }));
-      a.download = "osrodek-lab01-feedback.json";
+      a.download = "osrodek-lab02-feedback.json";
       a.click();
       saved.textContent = "No dev server — downloaded the file instead";
     }

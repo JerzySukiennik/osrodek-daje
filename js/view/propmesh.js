@@ -6,8 +6,12 @@ import { PROPS } from "../shared/props.js";
 
 const cache = new Map();
 
-export const propMaterial = new THREE.MeshLambertMaterial({ vertexColors: true, flatShading: true });
-export const burnMaterial = new THREE.MeshLambertMaterial({ vertexColors: true, flatShading: true, color: 0x6a3a2a, emissive: 0x551800 });
+export function useModelGeometries(map) {
+  for (const [type, geo] of map) if (PROPS[type]) cache.set(type, geo);
+}
+
+export const propMaterial = new THREE.MeshLambertMaterial({ vertexColors: true, flatShading: true, side: THREE.DoubleSide });
+export const burnMaterial = new THREE.MeshLambertMaterial({ vertexColors: true, flatShading: true, side: THREE.DoubleSide, color: 0x6a3a2a, emissive: 0x551800 });
 
 function partGeometry(part) {
   const s = part.size;

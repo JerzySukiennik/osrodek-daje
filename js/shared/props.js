@@ -232,10 +232,17 @@ export const PROPS = {
   }
 };
 
+Object.assign(PROPS, {
+  dropsik: { label: "Dropsik", grow: 0.25, density: 0.5, character: true, parts: [box(0.26, 0.5, 0.62, 0, 0.25, 0.04, P.black)] },
+  rys: { label: "Ryś", grow: 0.6, density: 0.5, character: true, parts: [box(0.44, 1.45, 0.34, 0, 0.725, 0, P.red)] },
+  jurek: { label: "Jurek", grow: 0.8, density: 0.5, character: true, parts: [box(0.56, 1.8, 0.4, 0, 0.9, 0, P.black)] },
+  ks: { label: "KS", grow: 1.0, density: 0.5, character: true, parts: [box(0.7, 1.95, 0.56, 0, 0.975, 0, P.white)] }
+});
+
 export const PROP_ORDER = [
   "tuft", "flower", "pebble", "mushroom", "apple", "duck", "bucket", "ball", "firework", "log", "crate",
   "campfire", "bench", "deckchair", "barrel", "grill", "parasol", "bush", "fence", "table", "kayak",
-  "sign", "pine", "rocket", "car", "cabin"
+  "sign", "pine", "rocket", "car", "cabin", "dropsik", "rys", "jurek", "ks"
 ];
 
 export function eulerToQuat(rx, ry, rz) {
