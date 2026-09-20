@@ -181,13 +181,12 @@ export const PROPS = {
     ]
   },
   sign: {
-    label: "Resort sign", grow: 0.8, density: 0.5, anchored: true, flammable: true,
+    label: "Resort sign", grow: 0.6, density: 0.5, anchored: true, flammable: true,
     parts: [
-      box(0.14, 1.9, 0.14, -1.1, 0.95, 0, P.woodDark),
-      box(0.14, 1.9, 0.14, 1.1, 0.95, 0, P.woodDark),
-      box(2.7, 0.9, 0.1, 0, 1.6, 0, P.cream),
-      box(2.3, 0.12, 0.12, 0, 1.75, 0.02, P.red, { nc: true }),
-      box(1.6, 0.1, 0.12, 0, 1.45, 0.02, P.navy, { nc: true })
+      cyl(0.22, 0.14, 0, 0.07, 0, P.stoneDark, { seg: 8 }),
+      box(0.16, 1.75, 0.16, 0, 0.87, 0, P.woodDark),
+      box(1.64, 1.46, 0.16, 0, 1.5, 0.22, P.cream, { rot: [0, -0.5, 0] }),
+      cyl(0.21, 0.21, 0, 1.66, 0.32, P.yellow, { rot: [-0.5, 0, 0], seg: 9, nc: true })
     ]
   },
   pine: {

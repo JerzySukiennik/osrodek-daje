@@ -245,16 +245,21 @@ def kayak():
 
 def sign():
     m = Model("sign")
-    for x in (-1.1, 1.1):
-        m.box(0.14, 1.95, 0.14, (x, 0.975, 0), "woodDark")
-        m.cone(0.11, 0.16, 4, (x, 2.03, 0), "woodDark", rot=(0, math.pi / 4, 0))
-    m.box(2.7, 0.9, 0.1, (0, 1.6, 0), "cream")
-    m.box(2.78, 0.08, 0.14, (0, 2.06, 0), "red")
-    m.box(2.78, 0.08, 0.14, (0, 1.14, 0), "red")
-    m.cyl(0.14, 0.14, 0.04, 10, (-1.0, 1.6, 0.07), "yellow", rot=(H, 0, 0))
+    YAW = -0.5
+    POS = (0, 1.5, 0.22)
+    m.cyl(0.22, 0.18, 0.14, 8, (0, 0.07, 0), "stoneDark")
+    m.box(0.16, 1.75, 0.16, (0, 0.87, 0), "woodDark")
+    board = [(-0.82, 0.6), (0.82, 0.6), (0.82, -0.22), (0.0, -0.86), (-0.82, -0.22)]
+    m.prism(board, 0.12, POS, "cream", rot=(0, YAW, 0))
+    m.prism([(p[0] * 0.88, p[1] * 0.88) for p in board], 0.15, POS, "red", rot=(0, YAW, 0))
+    m.prism([(p[0] * 0.74, p[1] * 0.74) for p in board], 0.17, POS, "cream", rot=(0, YAW, 0))
+    sun = [(math.cos(i / 9 * math.tau) * 0.21, 0.16 + math.sin(i / 9 * math.tau) * 0.21) for i in range(9)]
+    m.prism(sun, 0.21, POS, "yellow", rot=(0, YAW, 0))
     for i in range(8):
         a = i / 8 * math.tau
-        m.box(0.03, 0.09, 0.03, (-1.0 + math.cos(a) * 0.22, 1.6 + math.sin(a) * 0.22, 0.07), "yellow", rot=(0, 0, a - H))
+        ray = [(math.cos(a) * 0.26, 0.16 + math.sin(a) * 0.26), (math.cos(a) * 0.36, 0.16 + math.sin(a) * 0.36),
+               (math.cos(a + 0.22) * 0.34, 0.16 + math.sin(a + 0.22) * 0.34), (math.cos(a + 0.22) * 0.25, 0.16 + math.sin(a + 0.22) * 0.25)]
+        m.prism(ray, 0.2, POS, "yellow", rot=(0, YAW, 0))
     return m
 
 
