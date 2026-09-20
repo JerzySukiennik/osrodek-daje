@@ -62,7 +62,7 @@ export function createSim(RAPIER, levelArg, TUNE) {
   function spawnProp(type, x, z, rot = 0, y = 0, opts = {}) {
     const def = PROPS[type];
     if (!def) return null;
-    const anchored = !!def.anchored && !opts.loose;
+    const anchored = (!!def.anchored || !!opts.tag) && !opts.loose;
     const desc = (anchored ? RAPIER.RigidBodyDesc.fixed() : RAPIER.RigidBodyDesc.dynamic())
       .setTranslation(x, y, z)
       .setRotation({ x: 0, y: Math.sin(rot / 2), z: 0, w: Math.cos(rot / 2) })
@@ -325,18 +325,24 @@ export function createSim(RAPIER, levelArg, TUNE) {
 
       let near = false;
       let waker = false;
+      let pressed = false;
       for (const h of holeList) {
         const d = Math.hypot(t.x - h.x, t.z - h.z);
         const reach = h.r + prop.def.radius + 0.2;
         if (d < reach) {
           near = true;
           if (h.moved || Math.abs(h.r - h.rig.radius()) > 1e-4) waker = true;
-          if (prop.anchored && d < h.r + prop.def.base * 0.45) {
+          if (prop.anchored && !prop.tag && d < h.r + prop.def.base * 0.45) {
             prop.anchored = false;
             body.setBodyType(RAPIER.RigidBodyType.Dynamic, true);
             emit("uproot", { id: prop.id });
           }
           if (h.element === "fire" && d < h.r + TUNE.fireReach && t.y < 2.5) ignite(prop);
+          if (prop.tag && time >= prop.noSwallowUntil && d < h.r + prop.def.base * 0.5 + 0.25) {
+            swallow(h, prop, body.worldCom());
+            pressed = true;
+            break;
+          }
           if (h.fountainT > 0 && d < h.r + 0.6 && !body.isFixed()) {
             const m = body.mass();
             const ox = t.x - h.x, oz = t.z - h.z;
@@ -350,6 +356,7 @@ export function createSim(RAPIER, levelArg, TUNE) {
           emit("extinguish", { id: prop.id });
         }
       }
+      if (pressed) continue;
       if (near !== prop.near) {
         prop.near = near;
         setGroups(prop, near ? GROUPS.near : GROUPS.far);

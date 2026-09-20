@@ -138,7 +138,7 @@ const lobbyC = {
   items: [
     ...lobbySlots([{ x: -8.2, z: -1.2, type: "crate" }, { x: -2.8, z: -1.2, type: "crate" }, { x: 2.8, z: -1.2, type: "crate" }, { x: 8.2, z: -1.2, type: "crate" }]),
     { type: "cabin", x: -8.2, z: -4.6 }, { type: "cabin", x: 8.2, z: -4.6 },
-    { type: "sign", x: 0, z: 4.2, tag: "lobby:start" },
+    { type: "sign", x: 8.4, z: 3.4, tag: "lobby:start" },
     { type: "fence", x: -5.5, z: -6.2 }, { type: "fence", x: -3.4, z: -6.2 }, { type: "fence", x: 3.4, z: -6.2 }, { type: "fence", x: 5.5, z: -6.2 },
     { type: "bench", x: -5.6, z: 0.4, rot: 0 }, { type: "bench", x: 5.6, z: 0.4, rot: 0 },
     { type: "pine", x: -11.4, z: 5 }, { type: "pine", x: 11.4, z: 5 }, { type: "bush", x: 0, z: -2.4 },
@@ -163,7 +163,7 @@ const shopA = {
   items: [
     ...SHOP_ITEMS.map((it, i) => ({ type: it.type, x: -7.8 + i * 5.2, z: i % 2 ? -2.4 : -0.6, tag: "shop:" + it.id })),
     { type: "table", x: -7.8, z: -1.5, y: -0.72 }, { type: "table", x: 2.6, z: -1.5, y: -0.72 },
-    { type: "sign", x: 0, z: 4.4, tag: "shop:exit" },
+    { type: "sign", x: -9.6, z: 3.6, tag: "shop:exit" },
     { type: "parasol", x: -11.4, z: -1 }, { type: "parasol", x: 11.4, z: -1 },
     { type: "pine", x: -12.4, z: -5.4 }, { type: "pine", x: 12.4, z: -5.4 },
     { type: "barrel", x: -10.2, z: 3.4 }, { type: "crate", x: 9.6, z: 3.4 },
@@ -182,7 +182,7 @@ const shopB = {
       const a = (i / SHOP_ITEMS.length) * Math.PI * 2 + Math.PI * 0.75;
       return { type: it.type, x: Math.cos(a) * 4.1, z: -0.6 + Math.sin(a) * 3.5, tag: "shop:" + it.id };
     }),
-    { type: "sign", x: 0, z: 6.2, tag: "shop:exit" },
+    { type: "sign", x: -6.8, z: 4.4, tag: "shop:exit" },
     { type: "parasol", x: -6.4, z: -3.8 }, { type: "parasol", x: 6.4, z: -3.8 },
     { type: "pine", x: -7.4, z: -6 }, { type: "pine", x: 7.4, z: -6 }, { type: "bush", x: -6.8, z: 3.4 }, { type: "bush", x: 6.8, z: 3.4 },
     ...scatter(53, 16, ["tuft", "flower", "mushroom"], 7.4, 6.4, [[0, -0.6, 5]])
@@ -203,7 +203,7 @@ const shopC = {
         { type: "crate", x: x - 1.6, z: -3.4 }
       ];
     }),
-    { type: "sign", x: 0, z: 5, tag: "shop:exit" },
+    { type: "sign", x: -8.8, z: 4.2, tag: "shop:exit" },
     { type: "pine", x: -11.4, z: -6.4 }, { type: "pine", x: 11.4, z: -6.4 }, { type: "bush", x: 0, z: -6.2 },
     { type: "bench", x: -4, z: 3.4, rot: 0 }, { type: "bench", x: 4, z: 3.4, rot: 0 },
     ...scatter(59, 18, ["tuft", "flower", "pebble"], 11.4, 6.8, [[-8.1, -3.4, 2.6], [-2.7, -3.4, 2.6], [2.7, -3.4, 2.6], [8.1, -3.4, 2.6]])
@@ -246,7 +246,7 @@ export function labelsFor(scene, state = {}) {
 export function buildSelectScene(levels, progress = {}) {
   const n = levels.length;
   const items = [
-    { type: "sign", x: 0, z: 5.6, tag: "select:back" },
+    { type: "sign", x: -7.6, z: 3.8, tag: "select:back" },
     { type: "pine", x: -10.4, z: -5.4 }, { type: "pine", x: 10.4, z: -5.4 },
     { type: "pine", x: -5.2, z: -5.8 }, { type: "pine", x: 5.2, z: -5.8 },
     { type: "bush", x: -9.4, z: 2.6 }, { type: "bush", x: 9.4, z: 2.6 },
