@@ -2,7 +2,7 @@
 
 import * as THREE from "three";
 import { TUNE, loadTune } from "../shared/tune.js";
-import { buildLevel, ARENA } from "../shared/level.js";
+import { buildLevel } from "../shared/level.js";
 import { PROPS } from "../shared/props.js";
 import { MSG, PROTO, MAX_PLAYERS, PLAYER_COLORS, PLAYER_NAMES } from "../shared/protocol.js";
 import { createSim } from "../sim/world.js";
@@ -11,7 +11,8 @@ import { createPropMesh, propMaterial, burnMaterial, useModelGeometries } from "
 import { loadModelGeometries } from "../view/models.js";
 import { createHoleView } from "../view/holes.js";
 import { createFx } from "../view/fx.js";
-import { sfx, unlockAudio } from "../view/audio.js";
+import { sfx, unlockAudio, loadAudio, audio, playMusic, stopMusic } from "../view/audio.js";
+import { createShell } from "./shell.js";
 import { createPanel } from "./panel.js";
 
 const RAPIER_URL = "https://cdn.jsdelivr.net/npm/@dimforge/rapier3d-compat@0.14.0/+esm";
@@ -21,10 +22,11 @@ export async function startDisplay(root, canvas) {
   const params = new URLSearchParams(location.search);
 
   root.innerHTML = `
-    <div class="tv-title"><b>OŚRODEK DAJE</b><span>LAB 02 · characters & props</span></div>
+    <div class="tv-title"><b>OŚRODEK DAJE</b><span id="tv-scene">LAB 03 · screens & sound</span></div>
+    <div class="tv-stars" id="tv-stars"></div>
     <div class="tv-players" id="tv-players"></div>
     <div class="tv-join" id="tv-join"><div class="qr" id="tv-qr"></div><div class="join-text"><span>JOIN</span><b id="tv-code">····</b><small id="tv-net">starting…</small></div></div>
-    <div class="tv-hint" id="tv-hint">Click the grass for a mouse hole · hold SPACE, release to spit straight up · B adds a bot · P opens the lab panel</div>
+    <div class="tv-hint" id="tv-hint">Click the grass for a mouse hole · SPACE spits · 1/2/3 menu·lobby·shop · [ ] swap layout · B bot · P panel</div>
     <div class="tv-overlay" id="tv-overlay"></div>
     <div class="tv-loading" id="tv-loading">Loading physics…</div>`;
   root.hidden = false;
@@ -41,6 +43,9 @@ export async function startDisplay(root, canvas) {
   } catch (e) {
     console.warn("models.glb failed to load, falling back to primitives", e);
   }
+
+  const audioInfo = await loadAudio();
+  import("./agentation.js").then((m) => m.mountAgentation()).catch(() => {});
 
   const view = createView(canvas);
   const fx = createFx(view.scene, view.camera, root.querySelector("#tv-overlay"));
@@ -81,7 +86,11 @@ export async function startDisplay(root, canvas) {
     renderPlayers();
   }
 
-  function resetLevel() {
+  let shell = null;
+  let currentScene = null;
+
+  function loadScene(scene) {
+    currentScene = scene;
     for (const v of propViews.values()) view.scene.remove(v);
     propViews.clear();
     burning.clear();
@@ -89,10 +98,19 @@ export async function startDisplay(root, canvas) {
     for (const hv of holeViews.values()) hv.dispose();
     holeViews.clear();
     if (sim) sim.dispose();
-    sim = createSim(RAPIER, buildLevel(), TUNE);
+    view.setLevel(scene);
+    sim = createSim(RAPIER, scene, TUNE);
     for (const p of sim.props.values()) attachProp(p.id, p.type);
     for (const p of players.values()) sim.addHole(p.id, p.color);
     handleEvents(sim.drainEvents());
+    const el = root.querySelector("#tv-scene");
+    if (el) el.textContent = scene.kind === "level" ? "LAB 03 · baseplate" : scene.title;
+    const hint = root.querySelector("#tv-hint");
+    if (hint) hint.textContent = scene.blurb || "Baseplate · 1 menu · 2 lobby · 3 shop · [ ] swap layout · SPACE spits · B bot · P panel";
+  }
+
+  function resetLevel() {
+    if (currentScene) loadScene(currentScene);
   }
 
   function attachProp(id, type) {
@@ -122,7 +140,8 @@ export async function startDisplay(root, canvas) {
         sfx.swallow(e.size);
         if (e.wet) { fx.burst(e.pos[0], 0.1, e.pos[2], 10, { color: ["#7fd0ff", "#ffffff"], speed: 2, up: 4, size: 0.1 }); sfx.splash(); }
         if (e.size > 1.2) view.kick(0.12 + e.size * 0.05);
-        if (e.size > 0.3 && !e.counted) {
+        if (e.tag) shell.onSwallow(e.tag, e.hole, e.pos);
+        else if (e.size > 0.3 && !e.counted) {
           const pl = players.get(e.hole);
           fx.popup(PROPS[e.prop].label, e.pos[0], 0.6, e.pos[2], pl ? pl.color : "#fff");
         }
@@ -186,6 +205,7 @@ export async function startDisplay(root, canvas) {
   }
 
   function dropProp(id) {
+    if (shell) shell.refreshLabels();
     const mesh = propViews.get(id);
     if (mesh) view.scene.remove(mesh);
     propViews.delete(id);
@@ -245,8 +265,15 @@ export async function startDisplay(root, canvas) {
     }
   }
 
+  const starsEl = root.querySelector("#tv-stars");
+  function renderStars() {
+    if (!starsEl || !shell) return;
+    starsEl.innerHTML = `<b>${shell.state.stars}</b> ★<small>${shell.state.owned.length ? shell.state.owned.join(" · ") : "nothing bought"}</small>`;
+  }
+
   const playersEl = root.querySelector("#tv-players");
   function renderPlayers() {
+    renderStars();
     playersEl.innerHTML = "";
     for (const p of players.values()) {
       const h = sim.holes.get(p.id);
@@ -304,6 +331,12 @@ export async function startDisplay(root, canvas) {
     if (ev.code === "KeyN") removeBots();
     if (ev.code === "KeyM" && mouse.active) { removePlayer("mouse"); mouse.active = false; }
     if (ev.code === "KeyR") resetLevel();
+    if (ev.code === "Digit1") shell.show("menu");
+    if (ev.code === "Digit2") shell.show("lobby");
+    if (ev.code === "Digit3") shell.show("shop");
+    if (ev.code === "Digit4") shell.show("level");
+    if (ev.code === "BracketLeft") shell.cycleVariant(-1);
+    if (ev.code === "BracketRight") shell.cycleVariant(1);
     if (ev.code === "KeyP") panel.toggle();
   });
   window.addEventListener("keyup", (ev) => { if (ev.code === "Space") mouse.space = false; });
@@ -342,9 +375,31 @@ export async function startDisplay(root, canvas) {
     }
   }
 
+  shell = createShell({
+    load: loadScene,
+    respawn: (item) => {
+      setTimeout(() => {
+        if (!sim || currentScene !== shell.state.scene) return;
+        const prop = sim.spawnProp(item.type, item.x, item.z, item.rot || 0, (item.y || 0) + 0.4, { tag: item.tag, counted: true });
+        if (prop) prop.noSwallowUntil = sim.time() + 1.2;
+        shell.refreshLabels();
+      }, 450);
+    },
+    fx, sfx, players, music: () => playMusic()
+  });
+
   const panel = createPanel(root, {
     getStats: () => stats,
+    audio,
+    shell,
+    scenes: () => ({ screen: shell.state.screen, variant: shell.state.variant }),
+    show: (screen, variant) => shell.show(screen, variant),
     getSnapshot: () => ({
+      screen: shell.state.screen,
+      variant: shell.state.scene ? shell.state.scene.id : null,
+      stars: shell.state.stars,
+      owned: [...shell.state.owned],
+      audioPicks: Object.fromEntries((audio.categories() || []).map((c) => [c.id, audio.pick(c.id)])),
       players: Array.from(players.values()).map((p) => { const h = sim.holes.get(p.id); return { kind: p.kind, eaten: h ? h.eaten : 0, r: h ? h.r : 0 }; }),
       propsLeft: sim.props.size
     }),
@@ -366,7 +421,7 @@ export async function startDisplay(root, canvas) {
     }
   });
 
-  resetLevel();
+  shell.show("menu");
 
   let host = null;
   const lastPad = new Map();
@@ -491,7 +546,8 @@ export async function startDisplay(root, canvas) {
 
   window.__lab = {
     get sim() { return sim; },
-    players, stats, view, modelCount, addBot, removeBots, resetLevel, addPlayer, removePlayer,
+    players, stats, view, modelCount, addBot,
+    get shellRef() { return shell; }, removeBots, resetLevel, addPlayer, removePlayer,
     advance(seconds) { stepSim(Math.round(seconds * 60)); syncMeshes(); }
   };
 }

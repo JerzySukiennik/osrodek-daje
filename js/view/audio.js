@@ -1,8 +1,18 @@
-// Placeholder synth SFX (WebAudio) until the real, rated audio set arrives in phase 3.
+// Real CC0 samples from assets/audio/manifest.json. One pick per category is "live"; the jukebox panel swaps picks.
+
+const KEY = "osrodek.lab3.audio";
 
 let ctx = null;
 let master = null;
-let muted = false;
+let musicGain = null;
+let sfxGain = null;
+let manifest = { categories: [], tracks: [] };
+const byCat = new Map();
+const buffers = new Map();
+const picks = new Map();
+let musicEl = null;
+let musicId = null;
+let settings = { muted: false, music: 0.5, sfx: 0.8 };
 
 function ensure() {
   if (ctx) return ctx;
@@ -10,72 +20,153 @@ function ensure() {
   if (!AC) return null;
   ctx = new AC();
   master = ctx.createGain();
-  master.gain.value = 0.5;
+  musicGain = ctx.createGain();
+  sfxGain = ctx.createGain();
+  musicGain.connect(master);
+  sfxGain.connect(master);
   master.connect(ctx.destination);
+  applyVolumes();
   return ctx;
 }
+
+function applyVolumes() {
+  if (!master) return;
+  master.gain.value = settings.muted ? 0 : 1;
+  sfxGain.gain.value = settings.sfx;
+  musicGain.gain.value = settings.music * 0.55;
+  if (musicEl) musicEl.volume = settings.muted ? 0 : settings.music * 0.55;
+}
+
+export async function loadAudio(url = "assets/audio/manifest.json") {
+  try {
+    const res = await fetch(url);
+    manifest = await res.json();
+  } catch (e) {
+    console.warn("audio manifest missing", e);
+    return manifest;
+  }
+  for (const t of manifest.tracks) {
+    if (!byCat.has(t.cat)) byCat.set(t.cat, []);
+    byCat.get(t.cat).push(t);
+  }
+  let saved = {};
+  try { saved = JSON.parse(localStorage.getItem(KEY) || "{}"); } catch (e) {}
+  if (saved.settings) settings = { ...settings, ...saved.settings };
+  for (const [cat, list] of byCat) {
+    const want = saved.picks && saved.picks[cat];
+    picks.set(cat, list.some((t) => t.id === want) ? want : list[0].id);
+  }
+  return manifest;
+}
+
+function persist() {
+  try {
+    localStorage.setItem(KEY, JSON.stringify({ picks: Object.fromEntries(picks), settings }));
+  } catch (e) {}
+}
+
+export const audio = {
+  manifest: () => manifest,
+  categories: () => manifest.categories,
+  tracksIn: (cat) => byCat.get(cat) || [],
+  pick: (cat) => picks.get(cat),
+  setPick(cat, id) { picks.set(cat, id); persist(); },
+  settings: () => ({ ...settings }),
+  setSetting(key, value) { settings[key] = value; applyVolumes(); persist(); },
+  trackById: (id) => manifest.tracks.find((t) => t.id === id)
+};
 
 export function unlockAudio() {
   const c = ensure();
   if (c && c.state === "suspended") c.resume();
+  if (musicEl && musicEl.paused && musicId) musicEl.play().catch(() => {});
 }
 
-export function setMuted(m) { muted = m; }
+export function setMuted(m) { settings.muted = m; applyVolumes(); persist(); }
 
-function tone(type, f0, f1, dur, gain, delay = 0) {
+async function bufferFor(track) {
+  if (!track) return null;
+  if (buffers.has(track.id)) return buffers.get(track.id);
   const c = ensure();
-  if (!c || muted || c.state !== "running") return;
-  const t = c.currentTime + delay;
-  const o = c.createOscillator();
-  const g = c.createGain();
-  o.type = type;
-  o.frequency.setValueAtTime(f0, t);
-  o.frequency.exponentialRampToValueAtTime(Math.max(20, f1), t + dur);
-  g.gain.setValueAtTime(0.0001, t);
-  g.gain.exponentialRampToValueAtTime(gain, t + 0.012);
-  g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
-  o.connect(g).connect(master);
-  o.start(t);
-  o.stop(t + dur + 0.02);
+  if (!c) return null;
+  const p = fetch(track.file).then((r) => r.arrayBuffer()).then((b) => c.decodeAudioData(b)).catch(() => null);
+  buffers.set(track.id, p);
+  return p;
 }
 
-function noise(dur, gain, freq, q = 0.8, type = "bandpass") {
+export function preview(id) {
+  const track = audio.trackById(id);
+  if (!track) return;
+  if (track.cat === "music") { playMusic(id); return; }
+  playTrack(track, 1, 1);
+}
+
+async function playTrack(track, volume = 1, rate = 1) {
   const c = ensure();
-  if (!c || muted || c.state !== "running") return;
-  const n = Math.floor(c.sampleRate * dur);
-  const buf = c.createBuffer(1, n, c.sampleRate);
-  const d = buf.getChannelData(0);
-  for (let i = 0; i < n; i++) d[i] = (Math.random() * 2 - 1) * (1 - i / n);
+  if (!c || settings.muted || c.state !== "running") return;
+  const buf = await bufferFor(track);
+  if (!buf) return;
   const src = c.createBufferSource();
   src.buffer = buf;
-  const f = c.createBiquadFilter();
-  f.type = type;
-  f.frequency.value = freq;
-  f.Q.value = q;
+  src.playbackRate.value = rate;
   const g = c.createGain();
-  g.gain.value = gain;
-  src.connect(f).connect(g).connect(master);
+  g.gain.value = volume;
+  src.connect(g).connect(sfxGain);
   src.start();
 }
 
+export function play(cat, { volume = 1, rate = 1 } = {}) {
+  const id = picks.get(cat);
+  if (!id) return;
+  playTrack(audio.trackById(id), volume, rate);
+}
+
+export function playMusic(id) {
+  const track = audio.trackById(id || picks.get("music"));
+  if (!track) return;
+  if (musicEl && musicId === track.id && !musicEl.paused) return;
+  stopMusic();
+  musicEl = new Audio(track.file);
+  musicEl.loop = true;
+  musicEl.volume = settings.muted ? 0 : settings.music * 0.55;
+  musicId = track.id;
+  musicEl.play().catch(() => {});
+}
+
+export function stopMusic() {
+  if (musicEl) { musicEl.pause(); musicEl.src = ""; }
+  musicEl = null;
+  musicId = null;
+}
+
+export function currentMusic() { return musicId; }
+
 export const sfx = {
   swallow(size) {
-    const base = 520 / (0.6 + size * 1.6);
-    tone("sine", base * 1.8, base * 0.5, 0.16 + size * 0.06, 0.5);
-    if (size > 0.8) tone("triangle", 120, 45, 0.35, 0.5, 0.03);
+    if (size > 0.75) play("swallow-big", { rate: 1.1 - Math.min(0.3, size * 0.1) });
+    else play("swallow-small", { rate: 1.25 - Math.min(0.5, size * 0.6) });
   },
-  spit(power) { tone("square", 160, 620 + power * 500, 0.16, 0.18); noise(0.12, 0.2, 1800); },
-  burp() { tone("sawtooth", 140, 70, 0.18, 0.12); },
-  ignite() { noise(0.35, 0.3, 900, 0.5); },
-  burnout() { noise(0.25, 0.22, 400, 0.6, "lowpass"); },
-  steam() { noise(0.9, 0.3, 5200, 0.4, "highpass"); },
-  splash() { noise(0.3, 0.35, 1400, 0.7); tone("sine", 500, 180, 0.2, 0.2); },
-  fountain() { noise(1.0, 0.3, 2600, 0.5); },
-  fuse() { noise(0.5, 0.12, 6000, 2); },
-  liftoff() { tone("sawtooth", 300, 1400, 0.9, 0.12); noise(0.9, 0.18, 3000, 0.6); },
-  explode() { noise(0.5, 0.6, 300, 0.4, "lowpass"); tone("sine", 140, 40, 0.5, 0.6); tone("square", 1800, 900, 0.12, 0.08, 0.05); },
-  launch() { noise(3.5, 0.5, 220, 0.4, "lowpass"); tone("sawtooth", 60, 140, 3.2, 0.25); },
-  uproot() { tone("triangle", 220, 90, 0.2, 0.25); },
-  join() { tone("sine", 440, 440, 0.1, 0.25); tone("sine", 660, 660, 0.14, 0.25, 0.1); },
-  leave() { tone("sine", 440, 300, 0.2, 0.2); }
+  bump(force) { play("bump", { volume: Math.min(1, 0.25 + force), rate: 0.9 + Math.random() * 0.3 }); },
+  spit(power) { play("spit", { rate: 0.95 + power * 0.35 }); },
+  grow() { play("grow", { volume: 0.7 }); },
+  burp() { play("pop", { rate: 0.8 }); },
+  ignite() { play("fire"); },
+  burnout() { play("fire", { volume: 0.5, rate: 0.85 }); },
+  steam() { play("steam"); },
+  splash() { play("water"); },
+  fountain() { play("water", { volume: 0.9, rate: 0.85 }); },
+  fuse() { play("whoosh", { volume: 0.5, rate: 1.4 }); },
+  liftoff() { play("whoosh", { rate: 1.15 }); },
+  explode() { play("explosion"); },
+  launch() { play("rocket"); },
+  uproot() { play("uproot"); },
+  join() { play("join"); },
+  leave() { play("ui-back"); },
+  select() { play("ui-select"); },
+  back() { play("ui-back"); },
+  error() { play("ui-error"); },
+  buy() { play("buy"); },
+  star() { play("star"); },
+  jingle() { play("jingle"); },
+  dog() { play("dog"); }
 };

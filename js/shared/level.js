@@ -20,6 +20,8 @@ export const DECALS = [
   { kind: "blob", x: 11.5, z: 6.5, r: 2.4, color: "#9fca34", seed: 23 }
 ];
 
+export const LAB_LEVEL = { id: "lab", title: "LAB · baseplate", arena: ARENA, pond: POND, spawns: SPAWNS, decals: DECALS, items: [] };
+
 export function inPond(x, z, pad = 0) {
   const dx = (x - POND.x) / (POND.rx + pad);
   const dz = (z - POND.z) / (POND.rz + pad);

@@ -119,3 +119,37 @@ body.is-pad { background: var(--ink); position: fixed; inset: 0; touch-action: n
   .pad-spit { height: auto; margin: 8px 14px 16px 0; }
   .pad-stick { margin-bottom: 16px; }
 }
+
+.billboard { position: absolute; left: 0; top: 0; display: flex; flex-direction: column; align-items: center; gap: 1px; padding: 5px 14px 6px; background: var(--paper); color: var(--ink); border: 4px solid var(--ink); border-radius: 16px; box-shadow: 0 5px 0 var(--ink); white-space: nowrap; will-change: transform; }
+.billboard::after { content: ""; position: absolute; left: 50%; bottom: -13px; width: 0; height: 0; margin-left: -8px; border: 8px solid transparent; border-top-color: var(--ink); }
+.billboard b { font-size: 19px; font-weight: 700; letter-spacing: 0.02em; line-height: 1.05; }
+.billboard small { font-size: 12px; font-weight: 600; opacity: 0.72; max-width: 170px; overflow: hidden; text-overflow: ellipsis; }
+.billboard.is-go { background: var(--sun); }
+.billboard.is-go b { color: #7a4a00; }
+.billboard.is-poor { opacity: 0.72; }
+.billboard.is-poor b { color: #b02a3a; }
+.billboard.is-owned { background: #bdf0c4; }
+.billboard[style*="--pc"] b { color: var(--pc); }
+
+.tv-stars { position: absolute; left: 24px; top: 96px; display: flex; align-items: baseline; gap: 6px; background: var(--ink); color: var(--sun); border-radius: 99px; padding: 5px 16px; font-size: 20px; font-weight: 700; pointer-events: none !important; }
+.tv-stars small { color: var(--paper); font-size: 12px; font-weight: 600; opacity: 0.8; margin-left: 6px; }
+
+.panel nav { flex-wrap: wrap; }
+.panel nav button { flex: 1 1 28%; font-size: 13px; padding: 7px 4px; }
+.variants { margin-bottom: 14px; }
+.variants .row button { flex: 1; }
+.variants .row button b { display: block; font-size: 16px; }
+.variants .row button.on { background: var(--sun); }
+.variants .row button.win { border-color: #00a844; box-shadow: 0 3px 0 #00a844; }
+.panel button.wide { width: 100%; margin-top: 6px; font: inherit; font-weight: 700; font-size: 13px; border: 3px solid var(--ink); border-radius: 12px; padding: 7px; background: #fff; cursor: pointer; }
+.picked { display: block; margin-top: 4px; font-size: 12px; color: #00a844; font-weight: 700; }
+.jukebox { margin-bottom: 12px; }
+.jukebox .fl em { font-style: normal; opacity: 0.5; }
+.jb-list { display: flex; flex-wrap: wrap; gap: 5px; }
+.jb { flex: 1 1 46%; text-align: left; font: inherit; font-size: 12px; border: 3px solid var(--ink); border-radius: 10px; padding: 4px 7px; background: #fff; cursor: pointer; overflow: hidden; }
+.jb b { display: block; font-size: 12px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.jb small { font-size: 10px; opacity: 0.6; }
+.jb.on { background: var(--sun); }
+.jb.playing { border-color: var(--accent); }
+.vol { display: flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 700; flex: 1; }
+.vol input { flex: 1; accent-color: var(--accent); min-width: 60px; }

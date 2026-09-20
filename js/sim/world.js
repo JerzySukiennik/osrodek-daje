@@ -1,13 +1,22 @@
 // Headless simulation: Rapier world, props, holes, swallowing, growth, spitting, fire, water. No rendering or DOM in here.
 
 import { PROPS, MAX_PROP_RADIUS, eulerToQuat } from "../shared/props.js";
-import { ARENA, SPAWNS, inPond } from "../shared/level.js";
+import { LAB_LEVEL } from "../shared/level.js";
 import { GROUPS, createHoleRig } from "./holerig.js";
 
 const STEP = 1 / 60;
 const RIG_MARGIN = MAX_PROP_RADIUS * 2 + 1;
 
-export function createSim(RAPIER, levelItems, TUNE) {
+export function createSim(RAPIER, levelArg, TUNE) {
+  const level = Array.isArray(levelArg) ? { ...LAB_LEVEL, items: levelArg } : levelArg;
+  const ARENA = level.arena;
+  const SPAWNS = level.spawns;
+  const inPond = (x, z) => {
+    const p = level.pond;
+    if (!p) return false;
+    const dx = (x - p.x) / p.rx, dz = (z - p.z) / p.rz;
+    return dx * dx + dz * dz < 1;
+  };
   const world = new RAPIER.World({ x: 0, y: -TUNE.gravity, z: 0 });
   world.timestep = STEP;
 
@@ -71,10 +80,10 @@ export function createSim(RAPIER, levelItems, TUNE) {
     }
     const prop = {
       id: nextId++, type, def, body, anchored, near: false, ghostUntil: 0, noSwallowUntil: 0,
-      counted: !!opts.counted, burning: null, fuse: null, thrust: null, dead: false, stuck: 0
+      tag: opts.tag || null, counted: !!opts.counted, burning: null, fuse: null, thrust: null, dead: false, stuck: 0
     };
     props.set(prop.id, prop);
-    emit("spawn", { id: prop.id, prop: type });
+    emit("spawn", { id: prop.id, prop: type, tag: prop.tag });
     return prop;
   }
 
@@ -415,7 +424,7 @@ export function createSim(RAPIER, levelItems, TUNE) {
     const q = prop.body.rotation();
     const p = prop.body.translation();
     emit("swallow", {
-      hole: hole.id, id: prop.id, prop: prop.type, size: prop.def.radius, counted: prop.counted,
+      hole: hole.id, id: prop.id, prop: prop.type, size: prop.def.radius, counted: prop.counted, tag: prop.tag,
       pos: [p.x, p.y, p.z], quat: [q.x, q.y, q.z, q.w], vel: [v.x, v.y, v.z], wet: hole.element === "water"
     });
     const wasBurning = !!prop.burning;
@@ -469,7 +478,7 @@ export function createSim(RAPIER, levelItems, TUNE) {
     time += STEP;
   }
 
-  for (const it of levelItems) spawnProp(it.type, it.x, it.z, it.rot, it.y);
+  for (const it of level.items) spawnProp(it.type, it.x, it.z, it.rot || 0, it.y || 0, { tag: it.tag || null });
   events = [];
 
   return {

@@ -5,3 +5,4 @@ feedback/*.json
 .env
 Niepotrzebne/blender/renders/
 __pycache__/
+Niepotrzebne/audio-src/

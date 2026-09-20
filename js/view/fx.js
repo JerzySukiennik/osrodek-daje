@@ -58,6 +58,38 @@ export function createFx(scene, camera, overlay) {
     ghosts.push({ mesh: meshObj, vx: vel[0] * 0.4, vy: Math.min(vel[1], -1), vz: vel[2] * 0.4, t: 0, s: meshObj.scale.x });
   }
 
+  const labels = new Map();
+
+  function setLabels(list) {
+    const seen = new Set();
+    for (const l of list) {
+      seen.add(l.tag);
+      let entry = labels.get(l.tag);
+      if (!entry) {
+        const el = document.createElement("div");
+        el.className = "billboard";
+        overlay.appendChild(el);
+        entry = { el, x: l.x, y: l.y == null ? 1.25 : l.y, z: l.z };
+        labels.set(l.tag, entry);
+      }
+      entry.x = l.x;
+      entry.y = l.y == null ? 1.25 : l.y;
+      entry.z = l.z;
+      entry.el.className = "billboard" + (l.tone ? " is-" + l.tone : "");
+      if (l.color) entry.el.style.setProperty("--pc", l.color);
+      const html = `<b>${l.text}</b>` + (l.sub ? `<small>${l.sub}</small>` : "");
+      if (entry.html !== html) {
+        entry.el.innerHTML = html;
+        entry.html = html;
+      }
+    }
+    for (const [tag, entry] of labels) {
+      if (seen.has(tag)) continue;
+      entry.el.remove();
+      labels.delete(tag);
+    }
+  }
+
   function popup(text, x, y, z, color) {
     if (!overlay) return;
     const el = document.createElement("div");
@@ -101,6 +133,13 @@ export function createFx(scene, camera, overlay) {
       if (k <= 0) { scene.remove(gh.mesh); ghosts.splice(i, 1); }
     }
 
+    for (const entry of labels.values()) {
+      v3.set(entry.x, entry.y, entry.z).project(camera);
+      const vis = v3.z < 1;
+      entry.el.style.display = vis ? "" : "none";
+      if (vis) entry.el.style.transform = `translate(-50%,-100%) translate(${((v3.x + 1) / 2) * overlay.clientWidth}px, ${((1 - v3.y) / 2) * overlay.clientHeight}px)`;
+    }
+
     for (let i = popups.length - 1; i >= 0; i--) {
       const p = popups[i];
       p.t += dt;
@@ -111,5 +150,5 @@ export function createFx(scene, camera, overlay) {
     }
   }
 
-  return { emit, burst, ghost, popup, update };
+  return { emit, burst, ghost, popup, setLabels, update };
 }
