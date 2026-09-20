@@ -1,0 +1,9 @@
+node_modules/
+reference/
+feedback/*.json
+.DS_Store
+.env
+Niepotrzebne/blender/renders/
+__pycache__/
+Niepotrzebne/audio-src/
+.claude/.autodeploy-builds
